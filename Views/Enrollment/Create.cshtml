@@ -1,0 +1,61 @@
+@model OnlineCourseManagement.Models.Enrollment
+@{
+    ViewData["Title"] = "Course Enrollment";
+}
+<div class="form-page">
+    <div class="mb-4">
+        <span class="eyebrow">START LEARNING TODAY</span>
+        <h1 class="form-title">Course enrollment</h1>
+        <p class="text-muted">Complete the form below and reserve your place in a course.</p>
+    </div>
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="form-card">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                    <div class="mb-3">
+                        <label asp-for="LearnerName" class="form-label">Full name</label>
+                        <input asp-for="LearnerName" class="form-control" placeholder="Enter your full name" />
+                        <span asp-validation-for="LearnerName" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" placeholder="name@example.com" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Phone" class="form-label">Mobile number</label>
+                        <input asp-for="Phone" class="form-control" placeholder="10-digit mobile number" />
+                        <span asp-validation-for="Phone" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-4">
+                        <label asp-for="CourseId" class="form-label">Choose a course</label>
+                        <select asp-for="CourseId" class="form-select" asp-items="(SelectList)ViewBag.Courses">
+                            <option value="0">Select a course</option>
+                        </select>
+                        <span asp-validation-for="CourseId" class="text-danger small"></span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="submit" class="btn btn-primary">Submit enrollment</button>
+                        <a asp-controller="Course" asp-action="Index" class="btn btn-outline-secondary">Browse courses</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <aside class="form-aside">
+                <div class="aside-icon">🎓</div>
+                <h3 class="h5 mt-3">Your next step starts here</h3>
+                <p class="text-muted">Choose a course that matches your goals. Your details are used to record your enrollment in the course portal.</p>
+                <hr />
+                <p class="mb-2"><strong>What happens next?</strong></p>
+                <ul class="small text-muted ps-3">
+                    <li class="mb-2">Your enrollment is saved to the database.</li>
+                    <li class="mb-2">The admin can review your registration.</li>
+                    <li>You can return to explore other courses.</li>
+                </ul>
+            </aside>
+        </div>
+    </div>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

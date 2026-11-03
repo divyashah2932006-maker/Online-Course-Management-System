@@ -1,0 +1,230 @@
+
+@{
+    ViewData["Title"] = "REST API Demo";
+}
+
+<div class="mb-4">
+    <span class="eyebrow">PHASE 4 · REST API</span>
+    <h1>API playground</h1>
+    <p class="text-muted">Manage courses using REST API operations. Changes are saved to your SQLite database.</p>
+</div>
+
+<div class="api-panel mb-4">
+    <h2 class="h5">Create a course</h2>
+
+    <div class="row g-2">
+        <div class="col-md-3">
+            <input id="t" class="form-control" placeholder="Course title" />
+        </div>
+        <div class="col-md-2">
+            <input id="i" class="form-control" placeholder="Instructor" />
+        </div>
+        <div class="col-md-2">
+            <input id="cat" class="form-control" placeholder="Category" value="Programming" />
+        </div>
+        <div class="col-md-2">
+            <input id="f" type="number" min="0" class="form-control" placeholder="Fee (INR)" />
+        </div>
+        <div class="col-md-1">
+            <input id="w" type="number" min="1" class="form-control" placeholder="Weeks" />
+        </div>
+        <div class="col-md-2 d-grid">
+            <button class="btn btn-primary" onclick="addCourse()">Add course</button>
+        </div>
+    </div>
+</div>
+
+<div class="api-panel">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 mb-0">Available courses</h2>
+        <button class="btn btn-outline-primary btn-sm" onclick="load()">Refresh list</button>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Course</th>
+                    <th>Instructor</th>
+                    <th>Fee</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="rows">
+                <tr><td colspan="5">Loading courses...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-3 p-3 rounded bg-light">
+        <h3 class="h6 mb-2">API activity</h3>
+        <div id="apiStatus" class="small text-muted" role="status" aria-live="polite">
+            Connecting to course API...
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const rows = document.getElementById('rows');
+    const apiStatus = document.getElementById('apiStatus');
+
+    function setStatus(message, success = true) {
+        apiStatus.textContent = message;
+        apiStatus.className = success
+            ? 'small text-success'
+            : 'small text-danger';
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, char => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        })[char]);
+    }
+
+    async function load() {
+        try {
+            const response = await fetch('/api/courses');
+
+            if (!response.ok) {
+                throw new Error('Could not retrieve courses. Status: ' + response.status);
+            }
+
+            const data = await response.json();
+
+            rows.innerHTML = data.map(c => `
+                <tr>
+                    <td>${c.courseId}</td>
+                    <td>
+                        <strong>${escapeHtml(c.title)}</strong><br>
+                        <small class="text-muted">${escapeHtml(c.category)}</small>
+                    </td>
+                    <td>${escapeHtml(c.instructor)}</td>
+                    <td>₹${Number(c.fee).toLocaleString('en-IN')}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1"
+                                onclick="changeFee(${c.courseId})">PUT fee</button>
+                        <button class="btn btn-sm btn-outline-danger"
+                                onclick="del(${c.courseId})">DELETE</button>
+                    </td>
+                </tr>
+            `).join('') || '<tr><td colspan="5">No courses found.</td></tr>';
+
+            setStatus('Connected successfully. ' + data.length + ' courses loaded. HTTP 200 OK.');
+        }
+        catch (error) {
+            rows.innerHTML = '<tr><td colspan="5">Could not load courses.</td></tr>';
+            setStatus(error.message, false);
+        }
+    }
+
+    async function addCourse() {
+        const title = document.getElementById('t').value.trim();
+        const instructor = document.getElementById('i').value.trim();
+        const fee = Number(document.getElementById('f').value);
+        const weeks = Number(document.getElementById('w').value);
+
+        if (!title || !instructor || !document.getElementById('f').value ||
+            !document.getElementById('w').value || fee < 0 || weeks < 1) {
+            setStatus('Please enter a valid title, instructor, fee and duration.', false);
+            return;
+        }
+
+        const body = {
+            title: title,
+            instructor: instructor,
+            category: document.getElementById('cat').value.trim() || 'Programming',
+            fee: fee,
+            durationWeeks: weeks,
+            description: 'Created from the API playground.'
+        };
+
+        try {
+            const response = await fetch('/api/courses', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            if (!response.ok) {
+                throw new Error('Course creation failed. HTTP ' + response.status);
+            }
+
+            ['t', 'i', 'f', 'w'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+
+            setStatus('Course created successfully. HTTP ' + response.status + '.');
+            await load();
+        }
+        catch (error) {
+            setStatus(error.message, false);
+        }
+    }
+
+    async function changeFee(id) {
+        const fee = prompt('Enter the new course fee in INR:');
+
+        if (fee === null) return;
+
+        if (fee.trim() === '' || !Number.isFinite(Number(fee)) || Number(fee) < 0) {
+            setStatus('Please enter a valid fee.', false);
+            return;
+        }
+
+        try {
+            const getResponse = await fetch('/api/courses/' + id);
+
+            if (!getResponse.ok) {
+                throw new Error('Could not find course. HTTP ' + getResponse.status);
+            }
+
+            const course = await getResponse.json();
+            course.fee = Number(fee);
+
+            const response = await fetch('/api/courses/' + id, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(course)
+            });
+
+            if (!response.ok) {
+                throw new Error('Course update failed. HTTP ' + response.status);
+            }
+
+            setStatus('Course fee updated successfully. HTTP ' + response.status + '.');
+            await load();
+        }
+        catch (error) {
+            setStatus(error.message, false);
+        }
+    }
+
+    async function del(id) {
+        if (!confirm('Delete this course? This cannot be undone.')) return;
+
+        try {
+            const response = await fetch('/api/courses/' + id, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error('Course deletion failed. HTTP ' + response.status);
+            }
+
+            setStatus('Course deleted successfully. HTTP ' + response.status + '.');
+            await load();
+        }
+        catch (error) {
+            setStatus(error.message, false);
+        }
+    }
+
+    load();
+</script>
+}

@@ -1,0 +1,198 @@
+
+@using OnlineCourseManagement.Models
+
+@{
+    ViewData["Title"] = "Learn without limits";
+    var featured = ViewBag.FeaturedCourses as List<Course> ?? new List<Course>();
+    int count = (int)(ViewBag.CourseCount ?? 0);
+    int cats = (int)(ViewBag.CategoryCount ?? 0);
+}
+
+<section class="ch-hero mb-5">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+            <span class="eyebrow-light">LEARN • ENROLL • GROW</span>
+            <h1>Learn without<br /><span>limits.</span></h1>
+            <p class="hero-copy">
+                Build in-demand skills with practical courses, expert instructors and a learning experience designed around your goals.
+            </p>
+
+            <form asp-controller="Course" asp-action="Index" method="get" class="hero-search">
+                <input name="search" class="form-control"
+                       placeholder="What do you want to learn?"
+                       aria-label="Search courses" />
+                <button class="btn btn-primary" type="submit">Search courses</button>
+            </form>
+
+            <div class="d-flex flex-wrap gap-3 mt-4">
+                <a asp-controller="Course" asp-action="Index" class="btn btn-light btn-lg">Explore courses</a>
+                <a asp-controller="Enrollment" asp-action="Create" class="btn btn-outline-light btn-lg">Join a course</a>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="hero-art">
+                <div class="hero-art-orbit"></div>
+                <div class="hero-art-card">
+                    <div class="hero-art-cap">🎓</div>
+                    <strong>Your next skill starts here</strong>
+                    <span>Learn something meaningful today.</span>
+                    <div class="hero-progress"><i></i></div>
+                    <small>Personal learning journey</small>
+                </div>
+                <div class="floating-note note-one">✦ Learn by doing</div>
+                <div class="floating-note note-two">✓ Skills that move you forward</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="metric-strip row g-3 mb-5">
+    <div class="col-4">
+        <div class="metric">
+            <strong>@count+</strong>
+            <span>Courses to explore</span>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="metric">
+            <strong>@cats</strong>
+            <span>Learning categories</span>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="metric">
+            <strong>100%</strong>
+            <span>Learn at your pace</span>
+        </div>
+    </div>
+</div>
+
+<section class="mb-5">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">FIND YOUR PATH</span>
+            <h2>Explore top categories</h2>
+            <p>Choose a subject and discover a course that fits your goals.</p>
+        </div>
+        <a asp-controller="Course" asp-action="Index" class="text-link">View all courses →</a>
+    </div>
+
+    <div class="row g-3">
+        @foreach (var cat in new[] {
+            ("Programming", "⌨", "programming"),
+            ("Web Development", "◇", "web"),
+            ("Database Management", "▤", "database"),
+            ("Data Science", "▥", "datascience"),
+            ("Artificial Intelligence", "✧", "ai"),
+            ("Cybersecurity", "⬡", "cyber"),
+            ("Cloud Computing", "☁", "cloud"),
+            ("Mobile App Development", "▣", "mobile")
+        })
+        {
+            <div class="col-6 col-md-3">
+                <a class="category-tile"
+                   asp-controller="Course"
+                   asp-action="Index"
+                   asp-route-search="@cat.Item1">
+                    <span class="category-symbol">@cat.Item2</span>
+                    <strong>@cat.Item1</strong>
+                    <small>Explore courses</small>
+                </a>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="mb-5">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">POPULAR RIGHT NOW</span>
+            <h2>Featured courses</h2>
+            <p>Start with practical knowledge you can put to work.</p>
+        </div>
+        <a asp-controller="Course" asp-action="Index" class="text-link">Browse catalogue →</a>
+    </div>
+
+    <div class="row g-4">
+        @foreach (var c in featured)
+        {
+            var slug = System.Text.RegularExpressions.Regex
+    .Replace(c.Title.ToLowerInvariant(), @"[^a-z0-9]+", "-")
+    .Trim('-');
+
+if (c.Title.Equals("Python for Beginners", StringComparison.OrdinalIgnoreCase))
+{
+    slug = "python-programming-for-beginners";
+}
+
+            <div class="col-md-6 col-lg-4">
+                <article class="course-card h-100">
+                    <img src="~/images/courses/@(slug).svg"
+                         alt="@c.Title course illustration"
+                         onerror="this.onerror=null; this.src='/images/courses/general.svg';" />
+
+                    <div class="course-card-body">
+                        <span class="course-category">@c.Category</span>
+                        <h3>@c.Title</h3>
+                        <p class="instructor-line">By @c.Instructor</p>
+                        <p class="course-description">@c.Description</p>
+
+                        <div class="course-meta">
+                            <span>◷ @c.DurationWeeks weeks</span>
+                            <strong>₹@c.Fee.ToString("N0")</strong>
+                        </div>
+
+                        <a asp-controller="Course"
+                           asp-action="Details"
+                           asp-route-id="@c.CourseId"
+                           class="btn btn-outline-primary w-100 mt-3">
+                            View course
+                        </a>
+                    </div>
+                </article>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="learning-steps mb-5">
+    <div class="section-heading text-center justify-content-center">
+        <div>
+            <span class="eyebrow">SIMPLE TO GET STARTED</span>
+            <h2>Your learning journey</h2>
+            <p>Three simple steps from discovery to enrollment.</p>
+        </div>
+    </div>
+
+    <div class="row g-4 text-center">
+        <div class="col-md-4">
+            <div class="step-number">01</div>
+            <h3>Discover</h3>
+            <p>Explore topics and find the right course for your goals.</p>
+        </div>
+
+        <div class="col-md-4">
+            <div class="step-number">02</div>
+            <h3>Enroll</h3>
+            <p>Complete the registration form with secure validation.</p>
+        </div>
+
+        <div class="col-md-4">
+            <div class="step-number">03</div>
+            <h3>Grow</h3>
+            <p>Build skills with structured learning and expert guidance.</p>
+        </div>
+    </div>
+</section>
+
+<section class="bottom-cta">
+    <div>
+        <span class="eyebrow-light">YOUR NEXT CHAPTER STARTS HERE</span>
+        <h2>Make learning your superpower.</h2>
+        <p>Explore the catalogue and take the first step today.</p>
+    </div>
+    <a asp-controller="Course" asp-action="Index" class="btn btn-light btn-lg">
+        Explore courses →
+    </a>
+</section>

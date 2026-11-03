@@ -1,0 +1,20 @@
+@model OnlineCourseManagement.Models.DashboardViewModel
+@{ ViewData["Title"] = "Admin dashboard"; }
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+    <div><span class="eyebrow">ADMINISTRATION</span><h1 class="mb-1">Dashboard</h1><p class="text-muted mb-0">Overview of your course portal activity.</p></div>
+    <div class="d-flex flex-wrap gap-2"><a asp-controller="Course" asp-action="Create" class="btn btn-primary">＋ Add course</a><a asp-controller="Enrollment" asp-action="Index" class="btn btn-outline-primary">View enrollments</a></div>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-md-6"><div class="dashboard-stat"><span class="stat-icon">📚</span><div class="stat-label">Total courses</div><div class="stat-number">@Model.TotalCourses</div><a asp-controller="Course" asp-action="Index" class="small">Manage catalogue →</a></div></div>
+    <div class="col-md-6"><div class="dashboard-stat"><span class="stat-icon">👥</span><div class="stat-label">Total enrollments</div><div class="stat-number">@Model.TotalEnrollments</div><a asp-controller="Enrollment" asp-action="Index" class="small">Review learners →</a></div></div>
+</div>
+<div class="d-flex justify-content-between align-items-center mb-3"><h2 class="h4 mb-0">Recent enrollments</h2><a asp-controller="Enrollment" asp-action="Index" class="text-link">View all →</a></div>
+<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Learner</th><th>Email</th><th>Phone</th><th>Enrolled on</th></tr></thead><tbody>
+@foreach (var e in Model.Recent) { <tr><td><strong>@e.LearnerName</strong></td><td>@e.Email</td><td>@e.Phone</td><td>@e.EnrolledOn.ToString("dd MMM yyyy")</td></tr> }
+@if (!Model.Recent.Any()) { <tr><td colspan="4" class="text-center text-muted py-4">No enrollments yet.</td></tr> }
+</tbody></table></div>
+<div class="row g-3 mt-2">
+    <div class="col-md-4"><a asp-controller="Course" asp-action="Index" class="card card-body h-100"><strong>📚 Course management</strong><span class="small text-muted">Search, add, edit and remove courses.</span></a></div>
+    <div class="col-md-4"><a asp-controller="Enrollment" asp-action="Index" class="card card-body h-100"><strong>👥 Enrollment register</strong><span class="small text-muted">Review student registrations.</span></a></div>
+    <div class="col-md-4"><a asp-controller="Course" asp-action="ApiDemo" class="card card-body h-100"><strong>⚙ REST API demo</strong><span class="small text-muted">Test GET, POST, PUT and DELETE.</span></a></div>
+</div>

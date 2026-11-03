@@ -1,0 +1,7 @@
+@model IEnumerable<OnlineCourseManagement.Models.Enrollment>
+@{ ViewData["Title"] = "Enrollment register"; }
+<div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4"><div><span class="eyebrow">LEARNER RECORDS</span><h1 class="mb-1">Enrollment register</h1><p class="text-muted mb-0">All course registrations stored in the database.</p></div><a asp-action="Create" class="btn btn-primary">＋ New enrollment</a></div>
+<div class="table-responsive"><table class="table align-middle"><thead><tr><th>#</th><th>Learner</th><th>Email</th><th>Phone</th><th>Course</th><th>Date</th></tr></thead><tbody>
+@foreach (var e in Model) { <tr><td>@e.EnrollmentId</td><td><strong>@e.LearnerName</strong></td><td>@e.Email</td><td>@e.Phone</td><td>@(e.Course?.Title ?? "Course unavailable")</td><td>@e.EnrolledOn.ToString("dd MMM yyyy")</td></tr> }
+@if (!Model.Any()) { <tr><td colspan="6" class="text-center text-muted py-4">No enrollments recorded yet.</td></tr> }
+</tbody></table></div>

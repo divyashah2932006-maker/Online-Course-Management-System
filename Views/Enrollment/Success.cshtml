@@ -1,0 +1,11 @@
+@{ ViewData["Title"] = "Enrollment successful"; }
+<div class="success-panel">
+    <div class="success-icon">✓</div>
+    <span class="eyebrow">REGISTRATION RECEIVED</span>
+    <h1 class="mt-2">You're enrolled!</h1>
+    <p class="text-muted mb-4">Your enrollment has been saved successfully. Thank you for choosing CourseHub.</p>
+    <div class="d-flex justify-content-center flex-wrap gap-2">
+        <a asp-controller="Course" asp-action="Index" class="btn btn-primary">Explore more courses</a>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Back to home</a>
+    </div>
+</div>

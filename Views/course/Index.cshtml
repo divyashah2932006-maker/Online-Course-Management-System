@@ -1,0 +1,107 @@
+
+@model IEnumerable<OnlineCourseManagement.Models.Course>
+
+@{
+    ViewData["Title"] = "Explore courses";
+}
+
+<div class="catalog-hero mb-4">
+    <span class="eyebrow-light">THE COURSE CATALOGUE</span>
+    <h1>Find a course that<br />moves you forward.</h1>
+    <p>Explore practical learning across technology, business and creative skills.</p>
+</div>
+
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-3">
+    <div>
+        <h2 class="mb-1">Explore courses</h2>
+        <p class="text-muted mb-0">@Model.Count() course(s) available</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">＋ Add course</a>
+</div>
+
+<form asp-action="Index" method="get" class="catalog-search card card-body mb-4">
+    <div class="row g-2">
+        <div class="col-md-10">
+            <input name="search"
+                   value="@ViewBag.Search"
+                   class="form-control"
+                   placeholder="Search by course, instructor or category..."
+                   aria-label="Search courses" />
+        </div>
+        <div class="col-md-2 d-grid">
+            <button class="btn btn-primary">Search</button>
+        </div>
+    </div>
+</form>
+
+@if (TempData["Msg"] != null)
+{
+    <div class="alert alert-success">@TempData["Msg"]</div>
+}
+
+<div class="row g-4">
+    @foreach (var c in Model)
+    {
+        var key = c.Title.Equals("Python Programming", StringComparison.OrdinalIgnoreCase)
+            ? "python-programming-for-beginners"
+            : System.Text.RegularExpressions.Regex
+                .Replace(c.Title.ToLowerInvariant(), @"[^a-z0-9]+", "-")
+                .Trim('-');
+
+        <div class="col-md-6 col-xl-4">
+            <article class="course-card h-100">
+
+                <img src="~/images/courses/@(key).svg"
+                     alt="@c.Title course illustration"
+                     onerror="this.onerror=null; this.src='/images/courses/general.svg';" />
+
+                <div class="course-card-body">
+                    <span class="course-category">@c.Category</span>
+
+                    <h3>@c.Title</h3>
+
+                    <p class="instructor-line">By @c.Instructor</p>
+
+                    <p class="course-description">@c.Description</p>
+
+                    <div class="course-meta">
+                        <span>◷ @c.DurationWeeks weeks</span>
+                        <strong>₹@c.Fee.ToString("N0")</strong>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mt-3">
+                        <a asp-action="Details"
+                           asp-route-id="@c.CourseId"
+                           class="btn btn-outline-primary flex-grow-1">
+                            Details
+                        </a>
+
+                        <a asp-controller="Enrollment"
+                           asp-action="Create"
+                           asp-route-courseId="@c.CourseId"
+                           class="btn btn-primary flex-grow-1">
+                            Enroll
+                        </a>
+                    </div>
+
+                    <div class="admin-actions mt-2">
+                        <a asp-action="Edit" asp-route-id="@c.CourseId">Edit</a>
+
+                        <a asp-action="Delete"
+                           asp-route-id="@c.CourseId"
+                           class="text-danger">Delete</a>
+                    </div>
+                </div>
+            </article>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="empty-state">
+        <h3>No courses found</h3>
+        <p>Try a different search term.</p>
+        <a asp-action="Index" class="btn btn-outline-primary">Clear search</a>
+    </div>
+}
